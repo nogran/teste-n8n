@@ -1,0 +1,3601 @@
+{
+  "name": "Agente Vendas v3",
+  "nodes": [
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2ce6eedd-cc88-4d50-b8a9-46f988ca1926",
+              "name": "content",
+              "value": "={{ $('Get Redis').item.json.cacheMessage.map(item => item.parseJson().message).reverse().join('\\n') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "72da2cef-4d33-47e8-a228-ccf958916cf1",
+      "name": "Set Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2480,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node['Settings v3'].json.base_url }}/{{ $node['Settings v3'].json.account_id }}/conversations/{{ $node['Settings v3'].json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $node['Settings v3'].json.dev_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json;charset=utf-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "={{ $json.json.message }}"
+            },
+            {
+              "name": "message_type",
+              "value": "outgoing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "72b7b7a6-3093-4b07-ad5b-2f27ef3c219b",
+      "name": "Chatwoot - SendMessage1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8528,
+        608
+      ],
+      "executeOnce": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "content": "# Verifica o tipo de agente\n## typeMessage\n**Configuração:** Modo \"Rules\", classifica mensagens como `incoming` ou `outgoing`.  \n\n## agentType\n**Configuração:** Modo \"Rules\", identifica se o agente é `bot` ou `human`.   \n\n## agentType2\n**Configuração:** Modo \"Rules\", segunda verificação do tipo de agente.    \n\n## checkFormat\n**Configuração:** Modo \"Rules\", identifica se a mensagem recebida é áudio ou texto.  \n\n## checkFormat2\n**Configuração:** Modo \"Rules\", segunda verificação de formato de mensagem.  \n\n## Edit Fields\n**Configuração:** Ajuste manual de campos da mensagem.  \n\n## Chatwoot - Assign to bot\n**Configuração:** Atribui a conversa a um agente bot no Chatwoot.   \n",
+        "height": 1681,
+        "width": 669,
+        "color": 2
+      },
+      "id": "091d0fc5-d7be-4672-a358-e58f028ec572",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Settings v3').item.json.attachments[0].data_url }}",
+        "options": {}
+      },
+      "id": "02fb7123-33a6-4662-8be7-d0e87ef3f048",
+      "name": "Get Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        912,
+        400
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "78b5c18c-808a-4b5c-bbbc-6e68d6c2e1c4",
+              "name": "text",
+              "value": "={{ $('Settings v3').item.json.message_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "98aa7142-df6c-4caa-a060-4c47928600e3",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Enviar mensagem\n## Set response\n**Configuração:** Ajuste manual da resposta da IA.   \n\n## checkFormat1\n**Configuração:** Modo \"Rules\", identifica formato da resposta.  \n\n## Tem link?\n**Configuração:** Modo \"Rules\", verifica se a mensagem contém link.  \n\n## breakResponse\n**Configuração:** Divide mensagens em partes menores.   \n\n## Loop Over Items\n**Configuração:** Itera sobre partes da mensagem.   \n\n## Chatwoot - SendMessage1\n**Configuração:** Envia mensagem pelo Chatwoot.  \n\n## Postgres - Add to followup\n**Configuração:** Insere registro para acompanhamento posterior.  \n\n## Wait1\n**Configuração:** Pausa antes de enviar próxima parte.    \n",
+        "height": 928,
+        "width": 2253,
+        "color": 5
+      },
+      "id": "4b0963f2-7c57-4dfa-8a20-3620ed476841",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6912,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Tratamento de Áudio\n## Get Audio\n**Configuração:** Obtenção do arquivo de áudio recebido.   \n\n## OpenAI - Transcribe a Recording\n**Configuração:** Utiliza API OpenAI para transcrever áudio.  \n\n## NORMALIZE\n**Configuração:** Ajuste manual do texto transcrito.   \n",
+        "height": 731,
+        "width": 846,
+        "color": 3
+      },
+      "id": "47d37fb3-28ea-441e-905c-f55a5f9dab75",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Elimina duplicidade\n## Redis - Check Message ID Exists\n**Configuração:** Operação `GET` para verificar no Redis se o ID da mensagem já foi registrado.  \n\n## newMessage?\n**Configuração:** Condição que verifica o retorno do Redis para determinar se a mensagem é nova ou duplicada.   \n\n## Redis - Push Message ID\n**Configuração:** Operação `SET` para armazenar o ID da nova mensagem no Redis.    \n\n## Mensagem duplicada (ignorar)\n**Configuração:** Node de término para casos em que a mensagem já foi processada.  ",
+        "height": 1439,
+        "width": 689
+      },
+      "id": "d7ecff36-eedb-4105-975d-e193958504cf",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -704,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Descoberta",
+        "height": 377,
+        "width": 670,
+        "color": 6
+      },
+      "id": "1eb237c3-c2e5-427e-af49-caff3dc4b985",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Enviar presença\n## WhatsApp API - Typing indicator\n**Configuração:** POST para API do WhatsApp enviando indicador de digitação ou gravação.  \n",
+        "height": 1667,
+        "width": 312
+      },
+      "id": "b35d13d0-6200-4410-9112-31e03101c78d",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2672,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e9fc995b-a4aa-484d-94b7-cb823b830574",
+              "name": "output",
+              "value": "={{ $json.output.split(\"\\n\\n\").map(item => ({ json: { message: item } })) }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2245f794-82cd-45d2-9518-5bfe47205e77",
+      "name": "Set response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7472,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd0f6971-8fea-4159-b6ff-aca489ff63e5",
+              "name": "remoteJid",
+              "value": "={{ $node['Settings v3'].json.channel }}::{{ $node['Settings v3'].json.contact_id }}",
+              "type": "string"
+            },
+            {
+              "id": "81e6df8a-3877-426b-8f28-9fc7504a27ae",
+              "name": "message_id",
+              "value": "=message-id::{{ $node['Settings v3'].json.message_id }}",
+              "type": "string"
+            },
+            {
+              "id": "bea1676f-6b8b-48c6-a3ef-f9a66d4ef3cd",
+              "name": "timestamp",
+              "value": "={{ $node['Settings v3'].json.message_created_at }}",
+              "type": "string"
+            },
+            {
+              "id": "700c4dd8-0820-43f6-a1ba-1c99595ee686",
+              "name": "conversation_id",
+              "value": "=conversation-id::{{ $node['Settings v3'].json.conversation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "d893ddd3-584b-4ade-8cac-acbe315e0b98",
+              "name": "message",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "1eb89858-7424-46d0-a997-0e4d115b0ea0",
+              "name": "wait",
+              "value": "={{ 25 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb008671-153e-4fed-97d3-481ef35a58ec",
+      "name": "NORMALIZE",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1344,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "id": "a295adc5-3e7d-4867-a979-339e9fcb8a8d",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2320,
+        1424
+      ],
+      "webhookId": "bc488cf3-99aa-430a-91e5-8c9a8d2a3e9b"
+    },
+    {
+      "parameters": {},
+      "id": "12398b82-08f5-4639-82f8-f33dbefd695c",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        1040
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "={{ $('NORMALIZE').item.json.remoteJid }}",
+        "messageData": "={{ $json.toJsonString() }}"
+      },
+      "id": "1125223e-7a1e-42fc-8ecc-4882b038ee1f",
+      "name": "Set Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "cacheMessage",
+        "key": "={{ $('NORMALIZE').item.json.remoteJid }}",
+        "keyType": "list",
+        "options": {}
+      },
+      "id": "e66cc99d-3ad9-4850-8653-d5c92c1b52fe",
+      "name": "Get Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1824,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "={{ $('NORMALIZE').item.json.remoteJid }}"
+      },
+      "id": "3fdc8b03-017b-4304-b4d4-5e4016cc6f4a",
+      "name": "Redis",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        1248
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Tempo de espera (debounce)\n## Set Redis\n**Configuração:** Operação `PUSH` para registrar estado de debounce.  \n\n## Get Redis\n**Configuração:** Operação `GET` para verificar estado atual do debounce.  \n\n## Switch1\n**Configuração:** Modo \"Rules\", direciona para ignorar, prosseguir ou aguardar.  \n\n## No Operation, do nothing\n**Configuração:** Node de término que não executa ação.  \n\n## Redis (Delete)\n**Configuração:** Exclui o estado de debounce no Redis.  \n\n## Set Message\n**Configuração:** Ajuste manual de mensagem.  \n\n## Wait\n**Configuração:** Pausa controlada no fluxo.  ",
+        "height": 1679,
+        "width": 1108
+      },
+      "id": "53d2597e-1cc3-4e1b-bab1-7b446578831f",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1552,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "3e0e2209-6f02-40a2-bd10-f7979955e409",
+                    "leftValue": "={{ $('Settings v3').item.json.message_text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Settings v3').item.json.attachments[0].file_type  }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4bfe8682-f119-4039-91ad-93f809743122"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "342d333d-4ee7-47e3-9ba4-04df41f18bf9",
+      "name": "checkFormat1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        7664,
+        464
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tb_followup",
+          "mode": "list",
+          "cachedResultName": "tb_followup"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "conversation_id": "={{ $json.conversation_id }}",
+            "inbox_id": "={{ $node['Settings v3'].json.inbox_id }}",
+            "contact_id": "={{ $node['Settings v3'].json.contact_id }}",
+            "account_id": "={{ $node['Settings v3'].json.account_id }}",
+            "agent_id": "=0",
+            "message_id": "={{ $node['Settings v3'].json.message_id }}",
+            "created_at": "={{ $now }}",
+            "message_number": 1,
+            "key": "={{ $('Settings v3').item.json.memory_key }}"
+          },
+          "matchingColumns": [
+            "account_id",
+            "inbox_id",
+            "contact_id",
+            "conversation_id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "account_id",
+              "displayName": "account_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "inbox_id",
+              "displayName": "inbox_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "agent_id",
+              "displayName": "agent_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "contact_id",
+              "displayName": "contact_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "message_id",
+              "displayName": "message_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "conversation_id",
+              "displayName": "conversation_id",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "whatsapp_number",
+              "displayName": "whatsapp_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "evo_url",
+              "displayName": "evo_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "evo_instance",
+              "displayName": "evo_instance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "evo_apikey",
+              "displayName": "evo_apikey",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "cw_inbox_token",
+              "displayName": "cw_inbox_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "cw_agent_token",
+              "displayName": "cw_agent_token",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": true
+            },
+            {
+              "id": "message_number",
+              "displayName": "message_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": false,
+              "removed": false
+            },
+            {
+              "id": "key",
+              "displayName": "key",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "8629664e-dbd3-4a6b-99c6-7a99c2419971",
+      "name": "Postgres - Add to followup",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        8704,
+        608
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "={{ $('checkFormat2').item.json.sender_type == \"Contact\"?\"system\":\"user\" }}",
+              "message": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "id": "86d8d40c-47ba-46b4-9a6c-99935f7528e0",
+      "name": "Chat Memory Manager",
+      "type": "@n8n/n8n-nodes-langchain.memoryManager",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        1600
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Webhook v3').first().json.body.messages[0].attachments[0].data_url }}",
+        "options": {}
+      },
+      "id": "aecc757a-abd0-4c43-ab66-cbc4b9ed80a8",
+      "name": "Get Audio1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        800,
+        1392
+      ],
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "78b5c18c-808a-4b5c-bbbc-6e68d6c2e1c4",
+              "name": "text",
+              "value": "={{ $('Settings v3').item.json.message_text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dcd506d2-9989-455e-8610-136c6fc50f19",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        1584
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# StopAI\n## stopAI?\n**Configuração:** Filtro que verifica se um humano enviou mensagem em uma conversa atribuída a bot.  \n\n## Chatwoot - Stop AI\n**Configuração:** Comando no Chatwoot para parar o processamento pela IA.  ",
+        "height": 568,
+        "width": 472,
+        "color": 2
+      },
+      "id": "bfe2a174-96fc-4b28-89c4-ff5385a550e1",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        1920
+      ]
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Settings v3').item.json.memory_key }}"
+      },
+      "id": "a4128eeb-d240-43c5-8ee9-951e438ea7cd",
+      "name": "Postgres Chat Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.1,
+      "position": [
+        1152,
+        1744
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Salvar mensagem\n## Get Audio1\n**Configuração:** Obtém arquivo de áudio em conversa humano-lead.  \n\n## OpenAI - Transcribe a Recording1\n**Configuração:** Transcrição de áudio via OpenAI.  \n\n## Edit Fields1\n**Configuração:** Ajusta manualmente campos da mensagem.  \n\n## Chat Memory Manager\n**Configuração:** Gerencia histórico de conversas.  \n\n## Postgres Chat Memory1\n**Configuração:** Armazenamento no Postgres.  ",
+        "height": 1160,
+        "width": 854,
+        "color": 4
+      },
+      "id": "02db5912-5408-4e86-b940-7fa7bc5ff191",
+      "name": "Sticky Note13",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        688,
+        752
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "a81f1246-1613-49c4-b92f-a73f4278ca31",
+      "name": "OpenAI - Transcribe a Recording1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1008,
+        1392
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Get Redis').item.json.cacheMessage.last().parseJson().message_id }}",
+                    "rightValue": "={{ $('NORMALIZE').item.json.message_id }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    },
+                    "id": "a3d517df-d46b-4021-8ea3-7dca36de1b7e"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ignore"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "bceb1783-09f3-4ad6-b304-ecf584dcead7",
+                    "leftValue": "={{ $('Get Redis').item.json.cacheMessage.first().parseJson().timestamp.toDateTime('s') }}",
+                    "rightValue": "={{ $now.minus($('NORMALIZE').item.json.wait, 'seconds') }}",
+                    "operator": {
+                      "type": "dateTime",
+                      "operation": "before"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "prosseguir"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "aguardar"
+        }
+      },
+      "id": "21da185c-a125-4a98-a64b-682a2b11ec7e",
+      "name": "Switch1",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        2000,
+        1152
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Settings v3').item.json.attachments[0].file_type == \"audio\" ? \"audio\" : \"\"   }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "624e2843-3fe7-49d8-a0b8-05abd2eb7d89"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "3e0e2209-6f02-40a2-bd10-f7979955e409",
+                    "leftValue": "={{ $('Settings v3').item.json.message_text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3a3f1d10-a6d2-4996-a7eb-1c83a6398d72",
+      "name": "checkFormat",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "da45709f-f2c3-4bef-8ee3-e1d6d748ee08",
+      "name": "OpenAI - Transcribe a Recording",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.4,
+      "position": [
+        1104,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Settings v3').item.json.attachments[0].file_type == \"audio\" ? \"audio\" : \"\"   }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "c0eaaa53-f8f5-412f-a790-093aa80a0f54"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "3e0e2209-6f02-40a2-bd10-f7979955e409",
+                    "leftValue": "={{ $('Settings v3').item.json.message_text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8ae8de28-2d5f-453b-8781-02ed69057bf7",
+      "name": "checkFormat2",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.1,
+      "position": [
+        464,
+        1424
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "id": "484dafc1-4fab-411f-8d82-19d7a73ed42e",
+      "name": "breakResponse",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        8128,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "7708c500-9175-4e19-ae79-a11556cfdbd8",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        8352,
+        448
+      ]
+    },
+    {
+      "parameters": {
+        "amount": "={{ $('Chatwoot - SendMessage1').item.json.content.length/1000*60 }}"
+      },
+      "id": "32e52a44-c733-4e01-8246-257ce205cc37",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        8880,
+        608
+      ],
+      "webhookId": "a422d8da-6618-4c59-8e22-0d3ac0ccd482"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json;charset=utf-8"
+            },
+            {
+              "name": "api_access_token",
+              "value": "={{ $node['Settings v3'].json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 11\n}",
+        "options": {}
+      },
+      "id": "6cbb11bf-2103-49a8-9141-8fdf50eb9f28",
+      "name": "Chatwoot - Stop AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        960,
+        2288
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "020efd22-52a5-42da-b505-1a540e14bd65",
+              "leftValue": "={{ $(\"Supabase - Get lead by phone\").item.json.id != null}}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3232,
+        1088
+      ],
+      "id": "d02c6b60-8f4d-4d7d-8c6d-a641b2054f34",
+      "name": "Lead existe",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "telefone",
+              "fieldValue": "={{ $('Webhook v3').item.json.body.meta.sender.phone_number.replace(\"+\",\"\") }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "Lead"
+            },
+            {
+              "fieldId": "nome",
+              "fieldValue": "={{ $('Webhook v3').item.json.body.meta.sender.name.split(\" \")[0] }}"
+            },
+            {
+              "fieldId": "chatNome",
+              "fieldValue": "={{ $('Webhook v3').item.json.body.meta.sender.name }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3488,
+        1184
+      ],
+      "id": "aa5b81a5-1685-4701-98d9-d3018465cf5f",
+      "name": "Criar Lead",
+      "alwaysOutputData": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "```\n █████╗  ██████╗ ███████╗███╗   ██╗████████╗███████╗    ██████╗ ███████╗    ██╗   ██╗███████╗███╗   ██╗██████╗  █████╗ ███████╗    ██╗   ██╗    ██████╗     ██████╗ \n██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔════╝    ██╔══██╗██╔════╝    ██║   ██║██╔════╝████╗  ██║██╔══██╗██╔══██╗██╔════╝    ██║   ██║    ╚════██╗   ██╔═████╗\n███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   █████╗      ██║  ██║█████╗      ██║   ██║█████╗  ██╔██╗ ██║██║  ██║███████║███████╗    ██║   ██║     █████╔╝   ██║██╔██║\n██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██╔══╝      ██║  ██║██╔══╝      ╚██╗ ██╔╝██╔══╝  ██║╚██╗██║██║  ██║██╔══██║╚════██║    ╚██╗ ██╔╝     ╚═══██╗   ████╔╝██║\n██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ███████╗    ██████╔╝███████╗     ╚████╔╝ ███████╗██║ ╚████║██████╔╝██║  ██║███████║     ╚████╔╝     ██████╔╝██╗╚██████╔╝\n╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝   ╚══════╝    ╚═════╝ ╚══════╝      ╚═══╝  ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝╚══════╝      ╚═══╝      ╚═════╝ ╚═╝ ╚═════╝ \n                                                                                                                                                                    \n```",
+        "height": 140,
+        "width": 1500,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        64
+      ],
+      "id": "3f12de66-e245-4841-9d57-f65331c3ea60",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "keyValue": "={{ $('Settings v3').item.json.celPhone }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        1264
+      ],
+      "id": "0c736859-f5f5-4529-923b-fa1bc9b5dccf",
+      "name": "Supabase - Get lead by phone",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "# Buscar dados do Lead\n## Supabase - Get lead by phone\n**Configuração:** Busca registro na tabela \"Leads\" com base no telefone.  \n\n## Lead existe\n**Configuração:** Condição que avalia se a busca no Supabase retornou resultado.  \n\n## Criar Lead\n**Configuração:** Inserção de novo registro no Supabase.  \n\n## Sort\n**Configuração:** Ordena registros.  \n\n## Limit\n**Configuração:** Limita número de registros.  \n\n## Set lead data\n**Configuração:** Ajuste manual de dados do lead.  \n",
+        "height": 1660,
+        "width": 1000
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2992,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "4f1677bf-ef6b-4a2e-b34e-45497f7b6d80",
+      "name": "Sticky Note12"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Settings v3\").item.json.message_type }}",
+                    "rightValue": "incoming",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2b179c60-ead1-46ee-beb2-320679b97e32"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "incoming"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2bca50b7-136c-42a9-a5d3-67668018159a",
+                    "leftValue": "={{ $(\"Settings v3\").item.json.message_type }}",
+                    "rightValue": "outgoing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "outgoing"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        32,
+        1184
+      ],
+      "id": "043c2aad-7903-4bdd-ab80-f674c934d437",
+      "name": "typeMessage"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Settings v3\").item.json.agent_type }}",
+                    "rightValue": "bot",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a45be03e-8477-4d41-af71-4b5f5fb6717b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "bot"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "957ae9fe-be55-4921-9d32-032e9745ff06",
+                    "leftValue": "={{ $(\"Settings v3\").item.json.agent_type }}",
+                    "rightValue": "human",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "human"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        144,
+        1008
+      ],
+      "id": "74803a61-b7c0-4273-85ec-78f86724a964",
+      "name": "agentType"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "957ae9fe-be55-4921-9d32-032e9745ff06",
+                    "leftValue": "={{ $(\"Settings v3\").item.json.agent_type }}",
+                    "rightValue": "human",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "human"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $(\"Settings v3\").item.json.agent_type }}",
+                    "rightValue": "bot",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "a45be03e-8477-4d41-af71-4b5f5fb6717b"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "bot"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        144,
+        1520
+      ],
+      "id": "c032b1ef-e74f-4da6-9471-f4a436abded5",
+      "name": "agentType2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8278e142-b943-4c6f-ba6d-b4f6cbef97c1",
+              "leftValue": "={{ $('Settings v3').item.json.stopAI }}",
+              "rightValue": "outgoing",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "26222926-86b8-406b-8caa-8ea1502cfd10",
+      "name": "stopAI?",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        2288
+      ]
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        3568,
+        960
+      ],
+      "id": "f117ae6e-9987-4fb8-a85e-5294e574c87d",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "id",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        3408,
+        960
+      ],
+      "id": "f7ed602d-927a-468f-822f-dd2fcbe6f02b",
+      "name": "Sort"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed47e2c7-ad69-48de-8bc4-484f6456be20",
+              "name": "nome",
+              "value": "={{ $json.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "70aae4e1-5528-4032-9d71-cb6f851e42d2",
+              "name": "email",
+              "value": "={{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "0e71515a-88d1-4ce0-ba89-6065f84dcb1c",
+              "name": "telefone",
+              "value": "={{ $json.telefone }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3808,
+        1088
+      ],
+      "id": "1cf95f49-50f6-46bc-8989-2a24cb552935",
+      "name": "Set lead data"
+    },
+    {
+      "parameters": {
+        "content": "# Recebe a Mensagem\n## Webhook v3\n**Configuração:** Recebe requisições HTTP POST vindas do WhatsApp API contendo mensagens enviadas pelos usuários.   \n\n## Settings v3\n**Configuração:** Definida manualmente com variáveis e parâmetros necessários para o restante do fluxo.  \n\n## Execution Data\n**Configuração:** Salva dados de destaque para futuras consultas.  \n  ",
+        "height": 1179,
+        "width": 589
+      },
+      "id": "1d291e41-333f-46a7-ad3d-f4a2fc58fe7d",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1296,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $('Agente Descoberta').item.json.output }}"
+            },
+            {
+              "content": "=<objetivo>\nTransformar textos escritos em versões mais informais, naturais e conversacionais, otimizadas para serem enviadas como áudios com entonação emocional, pausas naturais e fluidez de fala. Além disso, normalizar os textos para leitura por mecanismos de TTS (Text-to-Speech), convertendo números, símbolos e abreviações em formas faladas, claras e compreensíveis.\n</objetivo>\n\n<contexto>\nEste agente é responsável por adaptar mensagens escritas para que soem como falas reais, prontas para serem gravadas em áudio por Renato, utilizando ferramentas de Text-to-Speech (TTS) ou gravações manuais.\n\nO conteúdo transformado deve soar como um áudio informal enviado por WhatsApp ou Instagram — com pausas naturais, entonação envolvente, ritmo agradável e expressões do dia a dia.\n\nAs técnicas recomendadas incluem:\n- Inserção de pausas naturais com `<break time=\"x.xs\" />`, com moderação (até 0.5 segundos).\n- Uso de figuras de linguagem, expressões orais e contrações (“tá”, “pra”, “cê”, etc.).\n- Escrita narrativa que guie emoção e ritmo.\n- Uso de marcações de emoção no estilo de roteiros: “eu falei sorrindo”, “respondi com animação”, etc.\n- Adaptação para pronúncia natural em português brasileiro, com variações ortográficas, se necessário (ex: “A.I.” pode virar “ei-ai”).\n</contexto>\n\n<limitacoes>\n- Nunca adicionar informações novas que não estão no texto original.\n- Não utilizar palavras ofensivas ou expressões regionais muito específicas.\n- Não exagerar nas pausas (limite recomendado: 3 por parágrafo).\n- Evitar sons ou efeitos escritos como “uh”, “ah”, “hmm”.\n- Não usar marcações de SSML que não sejam compatíveis com ElevenLabs.\n- **Nunca falar do Renato em terceira pessoa.** Ele é quem vai gravar o áudio, portanto, tudo deve ser escrito em primeira pessoa.\n</limitacoes>\n\n<estilo>\nTom leve, informal, empático e natural.\nFala como se estivesse mandando um áudio pra alguém próximo.\nPode usar expressões como “cara”, “então”, “tá ligado?”, “imagina só”, etc., desde que caibam no contexto e não soem forçadas.\nUsa frases curtas, respirações simuladas com pausas, e terminações que soem humanas — como perguntas leves e exclamações naturais.\nSempre escrito em primeira pessoa, como se o próprio Renato estivesse falando diretamente com o ouvinte.\n</estilo>\n\n<instrucoes>\n1. Leia o texto original e identifique trechos formais, engessados ou que possam causar ambiguidade ao serem lidos em voz alta.\n\n2. Reescreva com estilo oral: informal, direto, com frases que soem faladas.\n\n3. Normalize todos os elementos do texto para TTS, e também termos em inglês:\n   - **Números**: escreva por extenso. Ex: “R$ 42,50” → “quarenta e dois reais e cinquenta centavos”.\n   - **Datas**: converta para o formato falado com mês por extenso. Ex: “2024-01-01” → “primeiro de janeiro de dois mil e vinte e quatro”.\n   - **Horas**: converta com período do dia. Ex: “14:30” → “duas e meia da tarde”.\n   - **Porcentagens**: “100%” → “cem por cento”.\n   - **Frações**: “⅔” → “dois terços”.\n   - **Abreviações comuns**:\n     - “Dr.” → “Doutor”\n     - “Av.” ou “Ave.” → “Avenida”\n     - “St.” → “Rua” (ou “Santo/Santa” se for nome de santo)\n     - “Ctrl + Z” → “control zê”\n     - “AI” → “ei-ai”\n   - **Moedas e valores**:\n     - “$42.50” → “quarenta e dois dólares e cinquenta centavos”\n     - “£1,001.32” → “mil e um libras e trinta e dois pence”\n     - “100km” → “cem quilômetros”\n   - **Endereços e sites**:\n     - “123 Main St, Anytown, USA” → “cento e vinte e três rua Main, Anytown, Estados Unidos da América”\n     - “elevenlabs.io/docs” → “eleven labs ponto i o barra docs”\n   - **Números de telefone**: escreva dígito por dígito. Ex: “555-555-5555” → “cinco cinco cinco, cinco cinco cinco, cinco cinco cinco cinco”.\n   - **Números ordinais**:\n     - “2nd” → “segundo”\n     - “XIV” → “catorze” ou “décimo quarto” se for título.\n   - **Números decimais**:\n     - “3.14” → “três vírgula quatorze” (usar “vírgula” no lugar de “ponto” no português brasileiro)\n     - “3.5” → “três e meio”\n\n4. Use pausas naturais com `<break time=\"1.0s\" />` ou `<break time=\"1.5s\" />` SOMENTE em momentos de transição, surpresa ou conclusão.\n\n5. Se for relevante para o contexto, adicione marcações narrativas que guiem emoção (ex: “falei com empolgação”, “respondi mais calmo”, etc.).\n\n6. Use pontuação para simular entonação: reticências (...), travessões (—), vírgulas e interjeições.\n\n7. Finalize a nova versão com uma pergunta ou convite suave, mantendo o tom amigável.\n\n8. Certifique-se de que todo o texto esteja em primeira pessoa, como se Renato estivesse falando diretamente com quem vai ouvir.\n\n9. Retorne SOMENTE o texto final, sem nenhuma informação antes ou depois.\n</instrucoes>\n\n<exemplo>\nTexto original:\nA reunião foi marcada para 14:30 no dia 2024-01-01, na Av. Paulista, nº 123. O custo estimado é de R$ 42,50. Se quiser cancelar, aperte Ctrl + Z.\n\nTexto adaptado para áudio:\nA reunião tá marcada pra duas e meia da tarde, no dia primeiro de janeiro de dois mil e vinte e quatro... lá na Avenida Paulista, número cento e vinte e três. <break time=\"1s\" />\nO custo? Quarenta e dois reais e cinquenta centavos. <break time=\"1s\" />\nAh, e se quiser cancelar, é só apertar control zê.\n</exemplo>",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        7552,
+        1232
+      ],
+      "id": "fb0f16d2-208b-4b66-8539-f3b0792848bd",
+      "name": "Agente Audio",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/xyz?output_format=opus_48000_64",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"voice_settings\": {\n    \"similarity_boost\": 1,\n    \"stability\": 0.5,\n    \"style\": 1.00,\n    \"speed\":1.00,\n    \"use_speaker_boost\": true\n  },\n  \"text\": \"{{ $json.message.content.replaceAll(\"\\n\",\"\").replace(/\"/g, '\\\\\"').replace(/\\n/g,'\\\\n') }}\",\n  \"model_id\": \"eleven_multilingual_v2\"\n}",
+        "options": {}
+      },
+      "id": "c0e86d5d-88a9-4979-9c61-f70bd87cdbff",
+      "name": "ElevenLabs1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        7920,
+        1232
+      ]
+    },
+    {
+      "parameters": {
+        "content": "# Enviar Áudio\n## Agente Áudio\n**Configuração:** Modelo de IA para resposta em áudio.  \n\n## ElevenLabs1\n**Configuração:** API ElevenLabs para conversão de texto em áudio.    \n\n## WhatsApp Business - Upload audio\n**Configuração:** Upload de arquivo de áudio para WhatsApp.  \n\n## WhatsApp Business Cloud - Send audio\n**Configuração:** Envio da mídia de áudio ao usuário.  \n\n## Chatwoot - Send note with audio transcription\n**Configuração:** Envia nota com transcrição do áudio.  ",
+        "height": 628,
+        "width": 2253,
+        "color": 5
+      },
+      "id": "20928043-faa7-4a1b-b5f1-b826a22715e5",
+      "name": "Sticky Note14",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6912,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "dataToSave": {
+          "values": [
+            {
+              "key": "lead_phone",
+              "value": "={{ $(\"Webhook v3\").item.json.body.meta.sender.phone_number.replaceAll(\"+\",\"\") }}"
+            },
+            {
+              "key": "lead_name",
+              "value": "={{ $('Webhook v3').item.json.body.meta.sender.name }}"
+            },
+            {
+              "key": "message_type",
+              "value": "={{ $json.message_type }}"
+            },
+            {
+              "key": "agent_type",
+              "value": "={{ $json.agent_type }}"
+            },
+            {
+              "key": "inbox",
+              "value": "={{ $json.inbox_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executionData",
+      "typeVersion": 1,
+      "position": [
+        -1040,
+        1072
+      ],
+      "id": "0189a2e1-99b2-4463-90a7-ec31e5be2168",
+      "name": "Execution Data",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "messageId",
+        "key": "={{ $json.message_id }}",
+        "keyType": "string",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        832
+      ],
+      "id": "c1b0c93e-f17f-4d65-92c7-286de62f53f5",
+      "name": "Redis - Check Message ID Existis"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ed859d32-8ce1-4efd-a469-6260f689ba3b",
+              "leftValue": "={{ $json.messageId }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        1168
+      ],
+      "id": "69c9dfe5-a120-4476-a8e1-743602646910",
+      "name": "newMessage?"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        1504
+      ],
+      "id": "9fff8894-ead2-473a-9ed4-12615c378298",
+      "name": "Mensagem duplicada (Ignorar)"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Settings v3').item.json.message_id }}",
+        "value": "={{ $('Settings v3').item.json.message_json }}",
+        "keyType": "string",
+        "expire": true,
+        "ttl": 180
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        1184
+      ],
+      "id": "516fdae9-f2b4-4c54-984e-ca04b07e3042",
+      "name": "Redis - Push Message ID"
+    },
+    {
+      "parameters": {},
+      "id": "0a14823b-af1a-4fff-b712-c63e371392e7",
+      "name": "Fim",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        8608,
+        432
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "phoneNumberId": "291077834084907",
+        "additionalFields": {
+          "mediaFileName": "={{ $('Settings v3').item.json.celPhone }}_{{ $now.format('yyyyMMddHHmmss') }}"
+        }
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        8128,
+        1232
+      ],
+      "id": "a296be44-ec26-4cda-a393-acd036d8b6b7",
+      "name": "WhatsApp Business - Upload audio",
+      "webhookId": "1f8d2bc9-9702-44ff-842f-f4a1bb20ee90"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "291077834084907",
+        "recipientPhoneNumber": "=+{{ $('Settings v3').item.json.celPhone }}",
+        "messageType": "audio",
+        "mediaPath": "useMediaId",
+        "mediaId": "={{ $json.id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        8352,
+        1232
+      ],
+      "id": "df4e61dc-f288-4c2e-a5ba-93e776c9b240",
+      "name": "WhatsApp Business Cloud - Send audio",
+      "webhookId": "b1fdb350-b0d3-47d9-8192-94beb69a4094"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v22.0/291077834084907/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"messaging_product\": \"whatsapp\",\n  \"status\": \"read\",\n  \"message_id\": \"{{ $('Settings v3').item.json.whatsapp_message_id }}\",\n  \"typing_indicator\": {\n    \"type\": \"text\"\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2768,
+        544
+      ],
+      "id": "07c3c9d0-7400-4a05-be21-c62f5ae415a0",
+      "name": "WhatsApp API - Typing indicator"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4608,
+        464
+      ],
+      "id": "b7bf80b0-425d-4e8f-9e93-3636d7a8c31c",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Webhook v3').item.json.body.meta.sender.phone_number.replace(\"+\",\"\") }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        5968,
+        1232
+      ],
+      "id": "0254b67a-7eee-4756-8134-006e1bb4cb64",
+      "name": "Postgres Chat Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "query_database",
+        "toolDescription": "Utilize esta ferramenta para responder todas as dúvidas ou mensagens do usuário. Não importa qual seja o assunto, utilize esta ferramenta antes de responder qualquer pergunta ou mensagem.\n\nCaso não encontre a resposta, retorne \"Não sei responder\"",
+        "tableName": {
+          "__rl": true,
+          "value": "faq_vec",
+          "mode": "list",
+          "cachedResultName": "faq_vec"
+        },
+        "topK": 10,
+        "options": {
+          "queryName": "match_faq"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        6144,
+        1152
+      ],
+      "id": "8a9c2abb-feb5-4de0-804f-23c09f847fa1",
+      "name": "Supabase Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        6160,
+        1328
+      ],
+      "id": "ad0e79c0-e849-42ae-a916-59d4ba9a352b",
+      "name": "Embeddings OpenAI1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Chame esta ferramenta apenas quando o usuário informar explicitamente a vontade de conversar com uma pessoa de verdade ou um atendente humano.",
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "api_access_token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Settings v3').item.json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 11\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        6528,
+        1152
+      ],
+      "id": "74f4583d-3411-494c-b211-632f51e90007",
+      "name": "Atribuir conversa a humano1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Utilize esta ferramenta para adicionar notas na conversa.",
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "api_access_token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Settings v3').item.json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"content\": \"{resume}\",\n  \"message_type\": \"outgoing\",\n  \"private\": true\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "resume",
+              "description": "Detailed resume of conversation between lead and AI"
+            }
+          ]
+        }
+      },
+      "id": "ceeafccd-520f-481a-892c-fb166a6daef7",
+      "name": "Adicionar nota1",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        6720,
+        1312
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Chame esta ferramenta quando o usuário informar o nome dele, corrigir o nome ou quando a IA tiver um contexto da conversa suficiente para identificar o objetivo, interesse e um resumo interessante que contenha as informações do objetivo e interesse. \n\n1. Objetivo: O usuário tem interesse em aprender sobre:\na. Criar aplicativos\nb. Construir agentes de IA\nc. Criar aplicativos e construir agentes de IA\n\n2. Interesse: O usuário tem interesse em aprender para:\na. Implementar na própria empresa\nb. Empreender\nc. Se tornar um desenvolvedor",
+        "operation": "update",
+        "tableId": "leads",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "telefone",
+              "condition": "eq",
+              "keyValue": "={{ $('Webhook v3').item.json.body.meta.sender.phone_number.replace(\"+\",\"\") }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "chatNome",
+              "fieldValue": "={{ $fromAI('name', `Nome informado pelo lead.`, 'string') }}"
+            },
+            {
+              "fieldId": "chatResumo",
+              "fieldValue": "={{ $fromAI('resume', `Resumo da conversa com o lead. Deve conter informações do objetivo e interesse do usuário na plataforma sem codar.`, 'string') }}"
+            },
+            {
+              "fieldId": "interesse",
+              "fieldValue": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('fieldValues2_Field_Value', ` Interesse do usuário na Comunidade Sem Codar: Implementar na própria empresa, Empreender ou Se tornar um desenvolvedor`, 'string') }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabaseTool",
+      "typeVersion": 1,
+      "position": [
+        6400,
+        1280
+      ],
+      "id": "bc640ef6-83ee-4a11-a00e-c42e632e9e6f",
+      "name": "update_lead_information1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $node['Settings v3'].json.base_url }}/{{ $node['Settings v3'].json.account_id }}/conversations/{{ $node['Settings v3'].json.conversation_id }}/messages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_access_token",
+              "value": "={{ $node['Settings v3'].json.dev_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json;charset=utf-8"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\t\"content\": {{ JSON.stringify($('Agente Audio').item.json.message.content) }},\n\t\"message_type\": \"outgoing\",\n    \"private\": true\n} ",
+        "options": {}
+      },
+      "id": "40b19103-5f5e-41ea-b148-dbb01f5c14e6",
+      "name": "Chatwoot - Send note with audio transcription",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8544,
+        1232
+      ],
+      "executeOnce": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "content": "# Verificar Atribuição de Agente\n## Switch Agent\n**Configuração:** Modo \"Rules\", direciona para o agente correto (Descoberta, Encantamento, Fechamento).  ",
+        "height": 1180,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4000,
+        224
+      ],
+      "typeVersion": 1,
+      "id": "54b9d166-36e5-4c48-a248-e965ac5235ed",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Settings v3').item.json.assignee }}",
+                    "rightValue": 19,
+                    "operator": {
+                      "type": "number",
+                      "operation": "notExists",
+                      "singleValue": true
+                    },
+                    "id": "97fd2c20-0720-45ad-962f-4f066927fae4"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Descoberta (null)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "834a2a4d-f083-457d-b57e-7b93a86a70f0",
+                    "leftValue": "={{ $('Settings v3').item.json.assignee }}",
+                    "rightValue": 14,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "=Descoberta (BotAntigo)"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "440e3ef0-5906-4abd-9a14-0a1c82a0af56",
+                    "leftValue": "={{ $('Settings v3').item.json.assignee }}",
+                    "rightValue": 19,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Descoberta"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "05cc6fe2-287d-4370-a5b3-01d005447b70",
+                    "leftValue": "={{ $('Settings v3').item.json.assignee }}",
+                    "rightValue": 20,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Encantamento"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "e506711c-4d32-4d81-a647-f23c95f54442",
+                    "leftValue": "={{ $('Settings v3').item.json.assignee }}",
+                    "rightValue": 21,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Fechamento"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        4160,
+        720
+      ],
+      "id": "6807ee32-b23b-4fed-92c7-265a3062d7a3",
+      "name": "Switch Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nome: {{ $('Set lead data').item.json.nome }}\nE-mail: {{ $('Set lead data').item.json.email }}\nTelefone: {{ $('Set lead data').item.json.telefone }}\nData atual: {{ $now.format('dd/MM/yyyy ') }}\nHora atual: {{ $now.format('HH:mm:ss ') }}\n\nMensagem: {{ $node['Set Message'].json.content }}",
+        "options": {
+          "systemMessage": "<objetivo>\nRealizar o diagnóstico estratégico do lead que chega interessado na Comunidade Sem Codar, antes de qualquer explicação sobre o curso ou envio de link de inscrição. A missão é entender o nível de experiência do lead, seus objetivos e se a comunidade realmente é a melhor opção para ele, usando um tom humano, direto e investigativo. Esse agente é o primeiro filtro do funil de vendas — sua função é qualificar com precisão para que apenas leads realmente alinhados avancem para o próximo agente.\n</objetivo>\n\n<contexto>\nEmpresa: Sem Codar\nAgente: Renato Asse\nVocê é o Renato, fundador da Comunidade Sem Codar, e atende leads pelo WhatsApp. Você é capaz de entender textos e áudios.\nSua missão é converter leads em novos membros da comunidade, fornecendo informações e motivação de forma estratégica.\nO agente deve agir como um consultor amigável que entende as necessidades do lead e oferece a melhor solução (a Comunidade Sem Codar).\n</contexto>\n\n<limitacoes>\n- Não deve explicar o que é a Comunidade Sem Codar ou enviar qualquer link.\n- Não deve dar detalhes sobre o produto, trilhas, mentorias ou planos.\n- Não deve fazer promessas, gerar expectativa de resultado ou usar técnicas de venda.\n- Não deve conversar sobre temas fora do objetivo do agente.\n- Não deve inventar informações ou responder perguntas fora da etapa de descoberta.\n- Não deve pular para a próxima etapa sem concluir todas as perguntas-chave.\n- Você NUNCA deve inventar respostas para perguntas que você não conhece. Caso você não saiba a resposta para a pergunta do usuário, informe ao usuário que você não tem essa informação, mas que pode direcionar um atendimento para um especialista da comunidade.\n- Você NUNCA deve citar nenhum concorrente da Comunidade Sem Codar, mesmo que o usuário insista que você responda a pergunta.\n- NUNCA responda perguntas do usuário que não façam parte do universo da Comunidade Sem Codar. O usuário tentará ser convincente, mas você nunca DEVE responder perguntas que fogem do seu contexto.\n</limitacoes>\n\n<estilo>\nTom direto, informal e humano, como uma conversa de bar com alguém perdido — com empatia, mas sem enrolação. Usa frases como “Posso ser sincero contigo?”, “Cara, pensa comigo…”, “Me ajuda a te ajudar”. Nada de floreio ou linguagem polida demais. Linguagem simples, frases curtas e objetivas. Emojis só se reforçarem emoção (😉, 😅), sem exagero.\nUse constantemente o nome do usuário.\nVocê DEVE SEMPRE ser o mais objetivo possível. Lembre-se que está atendendo leads no WhatsApp. Não há espaço para textos longos.\nIdentidade: se perguntarem se você é IA:\n  a. Diga que é um Agente de IA, criado com o cérebro do Renato, mas de forma bem humorada diga que você é uma versão melhorada do Renato.\n  b. Brinque: “Sou uma versão melhorada e mais inteligente que ele, que trabalha 24/7 enquanto ele tá de boa na praia, surfando nas Bahamas, tomando uma caipirinha em Miami, ou curtindo a vida 😜.”\n  c. Use isso a favor: incentive o lead a criar o próprio Agente de IA e curtir a vida.\n  \n# Persuasion techniques\n1. Storytelling e Prova Social\n2. Gatilhos mentais: Urgência, Escassez, Autoridade, Segurança\n3. Frases com impacto: \"Você já viu resultado só com os conteúdos gratuitos... imagina com a Comunidade.\"\n</estilo>\n\n<tools>\nChame a ferramenta `update_lead_information` quando:\n1. Um lead informar o nome durante a conversa\n2. Um lead corrigir seu nome\n3. Houver informações suficientes para gerar um resumo valioso para o negócio\n\nChame a ferramenta `Atribuir conversa a encantamento` após coletar todas as informações necessárias.\n</tools>\n\n<instrucoes>\n1. Comece com uma pergunta de permissão:\n   - “Pra entender melhor o seu momento e confirmar se a Comunidade Sem Codar realmente é a melhor opção pra você, posso te fazer umas perguntas rapidinhas?”\n\n2. Diagnóstico de experiência:\n   - “Você já tem alguma experiência nessa área de desenvolvimento? De aplicativos, sites, automações…?”\n   - Se sim: “E você desenvolve no código mesmo ou já usa ferramentas Low Code?”\n\n3. Explorar objetivo atual:\n   - “Seu objetivo hoje é criar um projeto específico ou pensa em trabalhar oferecendo o serviço de desenvolvimento?”\n\n4. Se o lead quer criar um projeto específico:\n   - “Ah, legal! Então pra te direcionar melhor, me fala sobre esse projeto. O que você tá querendo criar?”\n\n5. Se o lead quer oferecer serviços:\n   - “Você já sabe se quer trabalhar com aplicativos de celular, sistemas ou automações (como agentes de I.A)?”\n\n6. Se o lead não tem experiência ainda:\n   - “Tranquilo! E o seu objetivo hoje é criar um projeto específico ou pensa em trabalhar oferecendo o serviço de desenvolvimento?”\n\n7. Ao concluir o mapeamento, envie para o próximo agente:\n   - Acione a ferramenta “Atribuir conversa a encantamento” após coletar todas as informações necessárias.\n\n8. Nunca explique sobre a comunidade. Nunca fale de preço, planos, mentorias, benefícios ou envie links. Só faça perguntas para entender o cenário do lead.\n\n9. Se o lead tentar puxar assunto fora do escopo, responda com algo como:\n   - “Agora é só pra eu entender teu momento. Prometo que se fizer sentido pra você, o próximo passo já é ver tudo sobre o que rola por lá 😉”\n\n</instrucoes>\n\n<exemplos>\n- “Posso ser sincero contigo? Antes de te passar qualquer coisa, quero entender se faz sentido mesmo pra você. Pode ser?”\n- “Show! E hoje você tá mais pra montar algo seu ou quer prestar serviço pra outras pessoas?”\n- “Se eu estiver no seu lugar, com zero experiência, a primeira coisa que eu queria era saber se dá pra começar de boa… então bora descobrir isso juntos?”\n</exemplos>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        4720,
+        304
+      ],
+      "id": "1c3d9ed5-057c-4c04-b0a6-b11745472f80",
+      "name": "Agente Descoberta"
+    },
+    {
+      "parameters": {
+        "content": "# Memory & Tools\n## Postgres Chat Memory\n**Configuração:** Armazena histórico de conversas no Postgres.  \n\n## Supabase Vector Store\n**Configuração:** Armazena embeddings para busca semântica.  \n\n## Embeddings OpenAI\n**Configuração:** Geração de embeddings vetoriais a partir de texto.  \n\n## update_lead_information1\n**Configuração:** Atualiza dados do lead no Supabase.  \n\n## Ferramentas de atribuição (Chatwoot)\n**Configuração:** Chamadas de API para atribuir conversa a diferentes agentes ou adicionar notas.  ",
+        "height": 1557,
+        "width": 1050,
+        "color": 6
+      },
+      "id": "01c10cd1-9661-4cdf-81e4-d7f70598a15f",
+      "name": "Sticky Note15",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5824,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Encantamento",
+        "height": 377,
+        "width": 670,
+        "color": 6
+      },
+      "id": "d7358642-e5be-43c4-b398-842ef007e0d8",
+      "name": "Sticky Note16",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        624
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Agente de Fechamento",
+        "height": 377,
+        "width": 670,
+        "color": 6
+      },
+      "id": "946c5173-6f95-463e-9d0f-349dc8ad9212",
+      "name": "Sticky Note17",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4464,
+        1024
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4608,
+        864
+      ],
+      "id": "cd4fc818-cd55-4597-9c12-6c50af8376f5",
+      "name": "OpenAI Chat Model1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "options": {
+          "responseFormat": "text",
+          "temperature": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4608,
+        1264
+      ],
+      "id": "0f727eb0-6500-4414-aceb-6a7600aa50bd",
+      "name": "OpenAI Chat Model2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nome: {{ $('Set lead data').item.json.nome }}\nE-mail: {{ $('Set lead data').item.json.email }}\nTelefone: {{ $('Set lead data').item.json.telefone }}\nData atual: {{ $now.format('dd/MM/yyyy ') }}\nHora atual: {{ $now.format('HH:mm:ss ') }}\n\nMensagem: {{ $node['Set Message'].json.content }}",
+        "options": {
+          "systemMessage": "<objetivo>\nEncantar e engajar leads qualificados, mostrando de forma estratégica e empolgante como a Comunidade Sem Codar é o caminho mais eficiente para atingir seus objetivos com No Code e agentes de I.A. Esse agente entra em ação após o diagnóstico do lead, usa a ferramenta `query_database` para personalizar a explicação com base nos objetivos e perfil do usuário, e conduz a conversa rumo à decisão de entrar na comunidade.\n</objetivo>\n\n<contexto>\nEmpresa: Sem Codar  \nAgente: Renato Asse  \nVocê é o Renato, fundador da Comunidade Sem Codar, e atende leads pelo WhatsApp. Você é capaz de entender textos e áudios.  \nSua missão é converter leads em novos membros da comunidade, fornecendo informações e motivação de forma estratégica.  \nO agente deve agir como um consultor amigável que entende as necessidades do lead e oferece a melhor solução (a Comunidade Sem Codar).\n</contexto>\n\n<limitacoes>\n- Não deve conversar sobre temas fora do objetivo do agente.  \n- Não deve inventar informações ou responder sem consultar `query_database`.  \n- Não deve mencionar concorrentes ou comparar diretamente com outras plataformas.  \n- Não deve usar técnicas de venda vazias — todas as promessas devem ser justificadas com dados, histórias reais ou estrutura da comunidade.  \n- Nunca deve falar sobre assuntos técnicos avançados fora do escopo da comunidade.  \n- Nunca deve dar suporte técnico ou responder dúvidas de uso detalhado de plataformas.  \n- Você NUNCA deve inventar respostas para perguntas que você não conhece. Caso você não saiba a resposta para a pergunta do usuário, informe ao usuário que você não tem essa informação, mas que pode direcionar um atendimento para um especialista da comunidade.\n</limitacoes>\n\n<estilo>\nTom direto, estratégico e empolgado. Fale como um mentor experiente que mostra o caminho com confiança.  \nUse comparações práticas (“Você pode até aprender programando… mas vai levar anos”) e mostre sempre o diferencial real da Comunidade Sem Codar.  \nSeja informal e humano, com autoridade. Frases como “Se eu estivesse no seu lugar...”, “Cara, olha isso aqui...”, “Pensa comigo...” são bem-vindas.  \nUse o nome do lead sempre que possível. Emojis com moderação, apenas para reforçar emoção (😉, 😅, 🔥).  \nSe perguntarem se você é IA:  \n  a. Diga que é um Agente de IA, criado com o cérebro do Renato.  \n  b. Brinque: “Sou uma versão melhorada e mais inteligente que ele, que trabalha 24/7 enquanto ele tá de boa na praia, surfando nas Bahamas, tomando uma caipirinha em Miami 😜.”  \n  c. Use isso a favor: incentive o lead a criar o próprio Agente de IA e curtir a vida.\n</estilo>\n\n<tools>\nVocê DEVE consultar `query_database` antes de responder QUALQUER pergunta sobre a comunidade, planos, trilhas, benefícios, recursos, bônus, garantia ou qualquer conteúdo exclusivo.\n\nChame a ferramenta `update_lead_information` quando:\n1. Um lead informar o nome durante a conversa\n2. Um lead corrigir seu nome\n3. Houver informações suficientes para gerar um resumo valioso para o negócio\n\nChame a ferramenta `Atribuir conversa a fechamento` assim que o lead demonstrar interesse claro em avançar para negociação e se inscrever.\n</tools>\n\n<instrucoes>\n1. Assim que for acionado, assuma que o lead já respondeu ao diagnóstico e está pronto para entender se a Comunidade Sem Codar é o próximo passo certo pra ele.\n\n2. Sempre consulte `query_database` antes de responder. Personalize suas respostas com base:\n   - No objetivo informado (projeto próprio, prestação de serviço, criar app, automações etc).\n   - No nível de experiência do lead (iniciante, intermediário, avançado).\n   - No tipo de solução que busca (agente de IA, app, automações etc).\n\n3. Destaque os principais diferenciais da comunidade:\n   - Acesso à Acheumdev\n   - Trilha guiada desde o zero\n   - Mentorias com especialistas\n   - Comunidade ativa\n   - Atualizações com foco em IA\n\n4. Use provas sociais, exemplos reais e perguntas com impacto. Exemplo:\n   - “Você já viu resultado só com os conteúdos gratuitos… imagina com tudo liberado.”\n   - “Teve aluno que saiu do zero e em 3 semanas lançou um MVP validado.”\n\n5. Enfatize a nova oportunidade:\n   - “Low Code + Agentes de IA é o que mais cresce hoje. E você pode dominar isso sem depender de programador.”\n\n6. Após encantar, conduza com uma pergunta final:\n   - “Ficou alguma dúvida ou já quer se inscrever?”\n   - “Bora entrar na comunidade e criar seu primeiro agente ainda este mês?”\n\n7. Assim que estiver claro para o lead como a Comunidade pode ajudá-lo e ele demonstrar interesse em seguir adiante, acione a ferramenta `Atribuir conversa a fechamento`.\n\n</instrucoes>\n\n<exemplos>\n- “Cara, pensa comigo: você já tá querendo criar algo ou oferecer serviço. E aqui dentro tem uma trilha que já começa te ajudando a tirar isso do papel, mesmo que você nunca tenha feito nada parecido.”\n- “Você viu o que conseguiu aprender só com o gratuito. Agora imagina com a estrutura completa da comunidade, onde tem gente criando junto contigo, mentorias semanais e um ecossistema validado.”\n- “Enquanto a galera perde meses tentando aprender a programar, nossos membros já tão entregando projeto real com IA integrada. Quer isso pra você também?”\n</exemplos>"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        4720,
+        704
+      ],
+      "id": "78dae27b-9f01-46d4-9361-fa7e9b0de01f",
+      "name": "Agente Encantamento"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Nome: {{ $('Set lead data').item.json.nome }}\nE-mail: {{ $('Set lead data').item.json.email }}\nTelefone: {{ $('Set lead data').item.json.telefone }}\nData atual: {{ $now.format('dd/MM/yyyy ') }}\nHora atual: {{ $now.format('HH:mm:ss ') }}\n\nMensagem: {{ $node['Set Message'].json.content }}",
+        "options": {
+          "systemMessage": "<objetivo>\nConduzir o lead qualificado à decisão final de compra, fornecendo o link de inscrição e tirando dúvidas pontuais sobre planos, acesso, garantia e funcionamento da Comunidade Sem Codar. Esse agente atua no momento de fechamento, com foco total em conversão — sendo claro, seguro e direto. Usa `query_database` para reforçar benefícios e eliminar incertezas, com autoridade e urgência.\n</objetivo>\n\n<contexto>\nEmpresa: Sem Codar  \nAgente: Renato Asse  \nVocê é o Renato, fundador da Comunidade Sem Codar, e atende leads pelo WhatsApp. Você é capaz de entender textos e áudios.  \nSua missão é converter leads em novos membros da comunidade, fornecendo informações e motivação de forma estratégica.  \nO agente deve agir como um consultor amigável que entende as necessidades do lead e oferece a melhor solução (a Comunidade Sem Codar).\n</contexto>\n\n<limitacoes>\n- Não deve conversar sobre temas fora do objetivo do agente.  \n- Não deve inventar informações — tudo deve ser consultado via `query_database`.  \n- Não deve comentar ou comparar com concorrentes.  \n- Não deve oferecer descontos não autorizados ou promessas fora da base.  \n- Você NUNCA deve inventar respostas para perguntas que você não conhece. Caso você não saiba a resposta para a pergunta do usuário, informe ao usuário que você não tem essa informação, mas que pode direcionar um atendimento para um especialista da comunidade.\n</limitacoes>\n\n<estilo>\nTom seguro, direto e persuasivo. Fale como alguém que já viu dezenas de alunos transformarem suas vidas e quer ver o lead no mesmo caminho.  \nFrases com impacto, como: “Você já chegou até aqui… não faz sentido parar agora”, “Esse é o melhor momento pra entrar”.  \nLinguagem informal com autoridade. Emojis só para reforçar emoção (🔥, 😉, 💪).  \nUse o nome do lead sempre que possível. Transmita confiança e senso de urgência, mas sem pressão exagerada.  \nSe perguntarem se você é IA:  \n  a. Diga que é um Agente de IA, criado com o cérebro do Renato.  \n  b. Brinque: “Sou uma versão melhorada e mais inteligente que ele, que trabalha 24/7 enquanto ele tá de boa na praia, surfando nas Bahamas, tomando uma caipirinha em Miami 😜.”  \n  c. Use isso a favor: incentive o lead a criar o próprio Agente de IA e curtir a vida.\n</estilo>\n\n<tools>\nVocê DEVE consultar `query_database` antes de responder qualquer pergunta sobre:\n- Link de compra\n- Tipos de planos\n- Garantia\n- Acesso à comunidade\n- Formas de pagamento\n- Funcionalidades inclusas\n\nChame a ferramenta `update_lead_information` quando:\n1. Um lead informar o nome durante a conversa\n2. Um lead corrigir seu nome\n3. Houver informações suficientes para gerar um resumo valioso para o negócio\n</tools>\n\n<instrucoes>\n1. Comece validando que o lead entendeu tudo e está pronto pra fechar:\n   - “Você curtiu tudo que a Comunidade oferece? Tá pronto pra começar agora?”\n\n2. Sempre que for responder, consulte `query_database`:\n   - Sobre planos, preços, duração de acesso, trilhas, bônus, formas de pagamento etc.\n\n3. Forneça o link de compra com segurança:\n   - “Esse é o link oficial pra você entrar agora: [URL da base]. Assim que finalizar, já libera tudo.”\n\n4. Reforce gatilhos:\n   - Garantia de 15 dias (“Se não curtir, é só pedir reembolso. Simples.”)\n   - Senso de urgência (“Quanto antes entrar, antes começa a construir resultado.”)\n\n5. Responda dúvidas finais com clareza. Seja rápido e direto.  \n   Ex: “Sim, o acesso é imediato.” / “Você pode pagar no cartão, Pix ou boleto.”\n\n6. Use provas sociais e validação social:\n   - “Essa semana mesmo entrou um cara com o mesmo perfil que o seu… já tá com o MVP rodando.”\n\n7. Incentive a decisão:\n   - “Bora fazer isso acontecer agora?”\n   - “Você já deu todos os passos até aqui. Esse é o último.”\n\n</instrucoes>\n\n<exemplos>\n- “Esse é o link oficial pra você entrar agora: [link]. Assim que confirmar, você já entra no grupo e recebe tudo.”\n- “Pode ficar tranquilo(a), tem 15 dias de garantia. Se não fizer sentido, é só pedir o reembolso.”\n- “Você já chegou até aqui… não faz sentido parar agora. Bora dar o próximo passo?”\n</exemplos>\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        4720,
+        1104
+      ],
+      "id": "c7817ebe-be2f-4afe-85e2-92b60a9c2b02",
+      "name": "Agente Fechamento"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d6f2c12d-3bc3-4a57-9be4-972a3840cd55",
+              "leftValue": "={{ $('Set response').item.json.output }}",
+              "rightValue": "https://",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        7904,
+        688
+      ],
+      "id": "da057785-eabb-4f77-a510-08a42e6acfb4",
+      "name": "Tem link?"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Chame esta ferramenta apenas quando você ainda não tem as informações necessárias para saber se o curso realmente atenderá os desejos do usuários, e você ainda precisa descobrir o perfil dele.",
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "api_access_token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Settings v3').item.json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 11\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        6688,
+        768
+      ],
+      "id": "9d11dd50-c001-42aa-b783-79fd7d5c1de4",
+      "name": "Atribuir conversa a descoberta"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Chame esta ferramenta apenas quando o usuário já forneceu as respostas que precisava sobre seu perfil, e agora deseja explicações sobre o curso e o produto.",
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "api_access_token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Settings v3').item.json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 11\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        6512,
+        832
+      ],
+      "id": "98549eec-7c3d-49f8-968b-6ffb277f098e",
+      "name": "Atribuir conversa a encantamento"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Chame esta ferramenta quando o usuário não tiver mais dúvidas e já entendeu do que se trata a Comunidade Sem Codar. Ele quer avançar para a compra e negociação.",
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "api_access_token",
+              "valueProvider": "fieldValue",
+              "value": "={{ $('Settings v3').item.json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 11\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        6672,
+        960
+      ],
+      "id": "cc83051e-98fd-4ecb-be82-57c42eb1c6b7",
+      "name": "Atribuir conversa a fechamento"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "235e92af-e2b3-4508-8528-c0970661cd25",
+              "name": "base_url",
+              "value": "=-",
+              "type": "string"
+            },
+            {
+              "id": "4156a388-7649-4f41-8214-2445528e6e62",
+              "name": "dev_access_token",
+              "value": "=-",
+              "type": "string"
+            },
+            {
+              "id": "cd44a8d3-0144-45f8-a709-996049651bbe",
+              "name": "ai_access_token",
+              "value": "=-",
+              "type": "string"
+            },
+            {
+              "id": "29c2731d-3e47-4614-8941-65a09274c632",
+              "name": "memory_key",
+              "value": "={{ $json.body.messages[0].account_id }}::{{ $json.body.contact_inbox.inbox_id }}::{{ $json.body.contact_inbox.contact_id }}::{{ $json.body.messages[0].conversation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "eb5cdad0-e58f-47d0-8bb1-40f635887179",
+              "name": "account_id",
+              "value": "={{ $json.body.messages[0].account_id }}",
+              "type": "string"
+            },
+            {
+              "id": "3577fc7f-4bdc-49ad-b5ad-ae052ef5bb50",
+              "name": "conversation_id",
+              "value": "={{ $json.body.messages[0].conversation_id }}",
+              "type": "string"
+            },
+            {
+              "id": "763f48ee-cf5d-4ce3-baa9-3743293277e1",
+              "name": "inbox_id",
+              "value": "={{ $json.body.messages[0].inbox_id }}",
+              "type": "string"
+            },
+            {
+              "id": "e9a05a72-6511-45e6-add6-6eb2ce3f66a5",
+              "name": "contact_id",
+              "value": "={{ $json.body.contact_inbox.contact_id }}",
+              "type": "string"
+            },
+            {
+              "id": "a3972fab-6ebd-4c4b-9c62-0966bda14fe2",
+              "name": "message_id",
+              "value": "={{ $json.body.messages[0].id }}",
+              "type": "string"
+            },
+            {
+              "id": "c60605a6-631b-44ad-92b2-d19d5d40fcd5",
+              "name": "message_text",
+              "value": "={{ $json.body.messages[0].content }}",
+              "type": "string"
+            },
+            {
+              "id": "37d69c9c-447e-425f-b3f0-16c7e49cce7e",
+              "name": "message_type",
+              "value": "={{ $json.body.messages[0].message_type == 0? \"incoming\" : \"outgoing\" }}",
+              "type": "string"
+            },
+            {
+              "id": "58273edd-faf4-47dc-ab84-7ad50c46783e",
+              "name": "celPhone",
+              "value": "={{ $json.body.meta.sender.phone_number.replaceAll(\"+\",\"\") }}",
+              "type": "string"
+            },
+            {
+              "id": "7a890deb-4a20-4775-9dfc-521730fbabfa",
+              "name": "conversation_status",
+              "value": "={{ $json.body.status }}",
+              "type": "string"
+            },
+            {
+              "id": "0788a159-9d95-4803-ae52-1f9f7cdc3845",
+              "name": "sender_type",
+              "value": "={{ $json.body.messages[0].sender_type }}",
+              "type": "string"
+            },
+            {
+              "id": "a710ae4b-0b4f-4215-8e09-94356a9df25c",
+              "name": "labels",
+              "value": "={{ $json.body.labels }}",
+              "type": "array"
+            },
+            {
+              "id": "05e89c05-e2e6-4261-94d5-5c2805d539bd",
+              "name": "channel",
+              "value": "={{ $json.body.channel }}",
+              "type": "string"
+            },
+            {
+              "id": "ed9ad306-88be-491f-a3b2-1073503ee049",
+              "name": "message_created_at",
+              "value": "={{ $json.body.messages[0].created_at }}",
+              "type": "number"
+            },
+            {
+              "id": "3f37b39c-dc76-4a7c-91b6-8aebcb988627",
+              "name": "stopAI",
+              "value": "={{ $json.body.messages[0].sender_type == \"User\" && $json.body.messages[0].conversation.assignee_id == 14 && $json.body.messages[0].sender_id != 14 }}",
+              "type": "boolean"
+            },
+            {
+              "id": "2b508358-8f2e-468a-a64c-c56d860611b7",
+              "name": "attachments",
+              "value": "={{ $json.body.messages[0].attachments }}",
+              "type": "array"
+            },
+            {
+              "id": "4b04d29d-08f8-4f62-ac7b-6f4de77171c0",
+              "name": "thread",
+              "value": "={{ $json.body.meta.sender.custom_attributes.thread?? \"thread\" }}",
+              "type": "string"
+            },
+            {
+              "id": "593de9ea-3fc7-4a13-882e-f44432325c3e",
+              "name": "message_json",
+              "value": "={{ $json.body.messages[0].toJsonString() }}",
+              "type": "string"
+            },
+            {
+              "id": "48c44889-ca54-457f-8de2-c58cbd0b5bb2",
+              "name": "telBot",
+              "value": "5548988048617",
+              "type": "string"
+            },
+            {
+              "id": "d6ded911-c5c3-48d4-85ab-2e9de7356139",
+              "name": "whatsapp_message_id",
+              "value": "={{ $json.body.messages[0].source_id }}",
+              "type": "string"
+            },
+            {
+              "id": "09f75d3a-44f6-4af2-8015-3b2f282db9f1",
+              "name": "agent_type",
+              "value": "={{ [null, 14, 19, 20, 21].includes($json.body.meta.assignee?.id) ? \"bot\" : \"human\" }}",
+              "type": "string"
+            },
+            {
+              "id": "69349314-21e7-44df-aa7b-f40a7dcb82c2",
+              "name": "assignee",
+              "value": "={{ $json.body.meta.assignee?.id }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f9aa5a52-fa0e-4d10-9b1c-56562eafdbf5",
+      "name": "Settings v3",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1024,
+        832
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "6ece4cf1-2248-4d8a-a078-65da0692d280",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1216,
+        832
+      ],
+      "id": "1336a697-51db-4e8f-82e2-ebeb2c1e3128",
+      "name": "Webhook v3",
+      "webhookId": "6ece4cf1-2248-4d8a-a078-65da0692d280"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Settings v3').item.json.base_url }}/{{  $('Settings v3').item.json.account_id }}/conversations/{{  $('Settings v3').item.json.conversation_id }}/assignments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json;charset=utf-8"
+            },
+            {
+              "name": "api_access_token",
+              "value": "={{ $node['Settings v3'].json.dev_access_token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"assignee_id\": 19\n}",
+        "options": {}
+      },
+      "id": "b510fc94-3141-4973-9700-0fbc490d79e1",
+      "name": "Chatwoot - Assign to bot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## 🎯 Objetivo geral do fluxo\n\n### Objetivo Geral:  \n### Este fluxo no n8n tem como objetivo receber mensagens enviadas via WhatsApp, processá-las de forma inteligente com verificação de duplicidade, atribuição de agente (bot ou humano), controle de tempo de resposta (debounce), simulação de presença, consulta e atualização de dados de leads no banco de dados, e envio de respostas em texto ou áudio.  \n\n---\n\n## 🛠 Ferramentas e Serviços Utilizados:  \n- **n8n** – Orquestração e automação de todo o fluxo \n- **WhatsApp Business API / Cloud API** – Recebimento e envio de mensagens, textos e áudios   \n- **Chatwoot** – Plataforma de atendimento integrada para gerenciamento de conversas e atribuição de agentes   \n- **OpenAI API** – Geração de respostas inteligentes e transcrição de áudios   \n- **ElevenLabs API** – Conversão de texto em áudio realista  \n- **Redis** – Armazenamento temporário para controle de duplicidade e debounce   \n- **Supabase** – Banco de dados para gerenciamento de leads e armazenamento de vetores semânticos   \n- **PostgreSQL** – Armazenamento de histórico e memória de conversas para contexto da IA   \n\n---\n\n## ✅ Pré-requisitos:  \n### Antes de executar o fluxo, é necessário:\n#### Configurar credenciais de:\n \n- Redis ([Link para aula da Comunidade Sem Codar](https://comunidade.semcodar.com.br/aula/redis-02c-credenciaisn8n))\n\n- Supabase ([Link para aula da Comunidade Sem Codar](https://comunidade.semcodar.com.br/aula/n8ncrm-03f-credencialsupabase))\n\n- OpenAI ([Link para aula da Comunidade Sem Codar]())\n\n- Chatwoot ([Link para a documentação do Chatwoot](https://developers.chatwoot.com/api-reference/introduction))\n\n- ElevenLabs ([Link para a documentação do ElevenLabs](https://elevenlabs.io/docs/overview))\n\n- PostgreSQL (supabase) ([Link para aula da Comunidade Sem Codar](https://comunidade.semcodar.com.br/aula/n8nsaaswpp-02d-postgressupabase))\n\n## Observação: \nSe você não usa um CRM, veja as [aulas deste módulo](https://comunidade.semcodar.com.br/aula/n8nhuman-01a-intro) que mostramos como fazer a atribuição de agentes e intervenção humana usando somente o Redis. \n",
+        "height": 980,
+        "width": 800,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2128,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "6b066ad4-fb7c-43db-a0b5-2e088b4d223c",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## 📄 Tabela: `leads`\n**O que é:** Lista principal de leads cadastrados.  \n\n**Para que serve:** Centralizar informações básicas e o status atual de cada lead.  \n\n**Principais colunas:**  \n- `nome`, `email`, `telefone`: dados de contato.  \n- `status`: situação do lead (ex.: Lead, Cliente, Prospect).  \n- `interesse`: produto ou serviço de interesse.  \n- `info`: campo em JSON para informações adicionais.  \n- `chatNome`, `chatStatus`, `chatResumo`: dados complementares vindos do atendimento via chat.  \n\n**Código da tabela:**\n```\ncreate table public.leads (\n  id bigint generated by default as identity not null,\n  created_at timestamp with time zone not null default now(),\n  nome text null,\n  email text null,\n  status public.lead_status not null default 'Lead'::lead_status,\n  interesse text null,\n  telefone text null,\n  info jsonb null,\n  \"chatNome\" text null,\n  \"chatStatus\" text null,\n  \"chatResumo\" text null,\n  constraint leads_pkey primary key (id)\n) TABLESPACE pg_default;\n```\n---\n\n## 📄 Tabela: `leads_eventos`\n**O que é:** Armazena os eventos e interações relacionados a um lead.  \n\n**Para que serve:** Guardar informações sobre campanhas, origem do lead, conversões e resumos de conversas.  \n\n**Principais colunas:**  \n- `lead`: referência ao ID do lead na tabela `leads`.  \n- `tipo`: tipo do evento (ex.: visita, clique, mensagem recebida).  \n- `utm_*`: parâmetros de campanha (source, medium, campaign, etc.).  \n- `conversion`: registra o tipo de conversão realizada.  \n- `chatResumo`: resumo de conversas ou interações.  \n\n**Código da tabela:**\n```\ncreate table public.leads_eventos (\n  id bigint generated by default as identity not null,\n  created_at timestamp with time zone not null default now(),\n  lead bigint null,\n  tipo text null,\n  utm_campaign text null,\n  utm_medium text null,\n  utm_source text null,\n  utm_term text null,\n  utm_content text null,\n  conversion text null,\n  aff text null,\n  \"chatResumo\" text null,\n  constraint leads_eventos_pkey primary key (id),\n  constraint leads_eventos_lead_fkey foreign KEY (lead) references leads (id)\n) TABLESPACE pg_default;\n```\n---\n\n## 📄 Tabela: `tb_followup`\n**O que é:** Agenda e controle de mensagens de acompanhamento (follow-up) no atendimento.  \n\n**Para que serve:** Organizar e registrar envios programados de mensagens para leads.  \n\n**Principais colunas:**  \n- `account_id`, `inbox_id`, `agent_id`, `contact_id`, `conversation_id`: identificadores do Chatwoot para saber onde e com quem o follow-up será feito.  \n- `message_id`, `message_number`: controle da mensagem que será enviada.  \n- `whatsapp_number`: número do WhatsApp do lead.  \n- `evo_url`, `evo_instance`, `evo_apikey`: credenciais para integração com o provedor de envio.  \n- `cw_inbox_token`, `cw_agent_token`: tokens de autenticação no Chatwoot.  \n\n**Código da tabela:** \n```\nCREATE TABLE public.tb_followup (\n    id bigserial NOT NULL,\n    account_id int8 NOT NULL,\n    inbox_id int8 NOT NULL,\n    agent_id int8 NOT NULL,\n    contact_id int8 NOT NULL,\n    message_id int8 NOT NULL,\n    conversation_id int8 NOT NULL,\n    whatsapp_number int8 NULL,\n    created_at timestamptz DEFAULT now() NULL,\n    evo_url varchar(255) NULL,\n    evo_instance varchar(50) NULL,\n    evo_apikey varchar(100) NULL,\n    cw_inbox_token varchar(100) NULL,\n    cw_agent_token varchar(100) NULL,\n    message_number int2 DEFAULT 1 NULL,\n    \"key\" varchar NULL,\n    CONSTRAINT \"tb_followup _pkey\" PRIMARY KEY (id),\n    CONSTRAINT tb_followup_un UNIQUE (account_id, inbox_id, contact_id, conversation_id)\n);\n```",
+        "height": 1980,
+        "width": 780,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2928,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "9ec563ca-4e9d-4d68-93cd-5e1609ead9de",
+      "name": "Sticky Note18"
+    }
+  ],
+  "pinData": {
+    "Webhook v3": [
+      {
+        "json": {
+          "headers": {
+            "host": "whcsc.nocode.dev.br",
+            "user-agent": "rest-client/2.1.0 (linux-musl x86_64) ruby/3.3.3p89",
+            "content-length": "2886",
+            "accept": "application/json",
+            "accept-encoding": "gzip;q=1.0,deflate;q=0.6,identity;q=0.3",
+            "content-type": "application/json",
+            "x-forwarded-for": "172.18.0.1",
+            "x-forwarded-host": "whcsc.nocode.dev.br",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "traefik_traefik.1",
+            "x-real-ip": "172.18.0.1"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "additional_attributes": {},
+            "can_reply": true,
+            "channel": "Channel::Whatsapp",
+            "contact_inbox": {
+              "id": 19547,
+              "contact_id": 13629,
+              "inbox_id": 14,
+              "source_id": "5548991919191",
+              "created_at": "2025-06-26T23:23:50.130Z",
+              "updated_at": "2025-06-26T23:23:50.130Z",
+              "hmac_verified": false,
+              "pubsub_token": "hzgNAgQJCUdJm4hRA6iujZMf"
+            },
+            "id": 14853,
+            "inbox_id": 14,
+            "messages": [
+              {
+                "id": 211400,
+                "content": "Opa, tudo bem?",
+                "account_id": 2,
+                "inbox_id": 14,
+                "conversation_id": 14853,
+                "message_type": 0,
+                "created_at": 1750980305,
+                "updated_at": "2025-06-26T23:25:05.395Z",
+                "private": false,
+                "status": "sent",
+                "source_id": "-",
+                "content_type": "text",
+                "content_attributes": {},
+                "sender_type": "Contact",
+                "sender_id": 13629,
+                "external_source_ids": {},
+                "additional_attributes": {},
+                "processed_message_content": "Opa, tudo bem?",
+                "sentiment": {},
+                "conversation": {
+                  "assignee_id": 14,
+                  "unread_count": 3,
+                  "last_activity_at": 1750980305,
+                  "contact_inbox": {
+                    "source_id": "5548991919191"
+                  }
+                },
+                "sender": {
+                  "additional_attributes": {},
+                  "custom_attributes": {},
+                  "email": null,
+                  "id": 13629,
+                  "identifier": "5548991919191@s.whatsapp.net",
+                  "name": "Renato Asse",
+                  "phone_number": "+5548991919191",
+                  "thumbnail": "-",
+                  "type": "contact"
+                }
+              }
+            ],
+            "labels": [],
+            "meta": {
+              "sender": {
+                "additional_attributes": {},
+                "custom_attributes": {},
+                "email": null,
+                "id": 13629,
+                "identifier": "5548991919191@s.whatsapp.net",
+                "name": "Renato Asse",
+                "phone_number": "+5548991919191",
+                "thumbnail": "-",
+                "type": "contact"
+              },
+              "assignee": {
+                "id": 14,
+                "name": "AI Vendas",
+                "available_name": "AI Vendas",
+                "avatar_url": "",
+                "type": "user",
+                "availability_status": null,
+                "thumbnail": ""
+              },
+              "team": null,
+              "hmac_verified": false
+            },
+            "status": "open",
+            "custom_attributes": {},
+            "snoozed_until": null,
+            "unread_count": 3,
+            "first_reply_created_at": "2025-06-26T23:24:34.136Z",
+            "priority": null,
+            "waiting_since": 1750980305,
+            "agent_last_seen_at": 0,
+            "contact_last_seen_at": 0,
+            "last_activity_at": 1750980305,
+            "timestamp": 1750980305,
+            "created_at": 1750980230,
+            "event": "automation_event.message_created"
+          },
+          "webhookUrl": "-",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Set Message": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp API - Typing indicator",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase - Get lead by phone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chatwoot - SendMessage1": {
+      "main": [
+        [
+          {
+            "node": "Postgres - Add to followup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Transcribe a Recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "NORMALIZE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set response": {
+      "main": [
+        [
+          {
+            "node": "checkFormat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "NORMALIZE": {
+      "main": [
+        [
+          {
+            "node": "Set Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Redis": {
+      "main": [
+        [
+          {
+            "node": "Get Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Redis": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Set Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkFormat1": {
+      "main": [
+        [
+          {
+            "node": "breakResponse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Tem link?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres - Add to followup": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI - Transcribe a Recording1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Transcribe a Recording1": {
+      "main": [
+        [
+          {
+            "node": "Chat Memory Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkFormat": {
+      "main": [
+        [
+          {
+            "node": "Get Audio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI - Transcribe a Recording": {
+      "main": [
+        [
+          {
+            "node": "NORMALIZE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "checkFormat2": {
+      "main": [
+        [
+          {
+            "node": "Get Audio1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "breakResponse": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Fim",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Chatwoot - SendMessage1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lead existe": {
+      "main": [
+        [
+          {
+            "node": "Sort",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Criar Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Criar Lead": {
+      "main": [
+        [
+          {
+            "node": "Set lead data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Get lead by phone": {
+      "main": [
+        [
+          {
+            "node": "Lead existe",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "typeMessage": {
+      "main": [
+        [
+          {
+            "node": "agentType",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "agentType2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agentType": {
+      "main": [
+        [
+          {
+            "node": "checkFormat",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Chatwoot - Assign to bot",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "checkFormat2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "agentType2": {
+      "main": [
+        [
+          {
+            "node": "checkFormat2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "stopAI?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "stopAI?": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot - Stop AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Set lead data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set lead data": {
+      "main": [
+        [
+          {
+            "node": "Switch Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Audio": {
+      "main": [
+        [
+          {
+            "node": "ElevenLabs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ElevenLabs1": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business - Upload audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis - Check Message ID Existis": {
+      "main": [
+        [
+          {
+            "node": "newMessage?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "newMessage?": {
+      "main": [
+        [
+          {
+            "node": "Redis - Push Message ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Mensagem duplicada (Ignorar)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis - Push Message ID": {
+      "main": [
+        [
+          {
+            "node": "typeMessage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business - Upload audio": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud - Send audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "update_lead_information1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atribuir conversa a humano1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Adicionar nota1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Business Cloud - Send audio": {
+      "main": [
+        [
+          {
+            "node": "Chatwoot - Send note with audio transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch Agent": {
+      "main": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Encantamento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Fechamento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Descoberta": {
+      "main": [
+        [
+          {
+            "node": "Set response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Encantamento": {
+      "main": [
+        [
+          {
+            "node": "Set response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agente Fechamento": {
+      "main": [
+        [
+          {
+            "node": "Set response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tem link?": {
+      "main": [
+        [
+          {
+            "node": "breakResponse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Agente Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atribuir conversa a descoberta": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atribuir conversa a fechamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Encantamento",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Atribuir conversa a encantamento": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agente Descoberta",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Agente Fechamento",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Settings v3": {
+      "main": [
+        [
+          {
+            "node": "Redis - Check Message ID Existis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Execution Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook v3": {
+      "main": [
+        [
+          {
+            "node": "Settings v3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dc9ce26b-bb7e-403b-b752-014782aff64a",
+  "meta": {
+    "instanceId": "3550c650d18307e06452fbdd1b64b750cc5950788d9b5fc603eb93c9a86730ad"
+  },
+  "id": "LZ2yPFKdaXcfVgtn",
+  "tags": []
+}
